@@ -1,0 +1,3 @@
+//,
+    //"bheem": "nodemon ./routes/index.js"
+        "start": "node ./bin/www"
