@@ -306,6 +306,7 @@ app.post("/signupadmin", async (req, res) => {
 
 // Route to handle user login
 app.post("/login", async (req, res) => {
+  console.log("called login");
   const { username, password } = req.body;
   const db = client.db("Jee");
   const usersCollection = db.collection("users");
@@ -338,6 +339,7 @@ app.post("/login", async (req, res) => {
 
 // Route to handle user login
 app.post("/loginadmin", async (req, res) => {
+  console.log("called loginadmin");
   const { username, password } = req.body;
   const db = client.db("Jee");
   const usersCollection = db.collection("admins");
@@ -366,6 +368,47 @@ app.post("/loginadmin", async (req, res) => {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Internal Server Error", error });
   }
+});
+
+app.post("/addtestadmin", async (req, res) => {
+  console.log("called addtestadmin");
+  const testnum = parseInt(req.body.testnum);
+  const questions = req.body.questions;
+  const scheduled = req.body.scheduled;
+  const allocatedStudents = req.body.allocatedStudents;
+  console.log(testnum);
+  console.log(questions);
+  console.log(scheduled);
+  console.log(allocatedStudents);
+  const db = client.db("Jee");
+  const coll = db.collection("main");
+
+  //if testnum already exists then return error
+  const cursor = coll.find({ testnum: testnum });
+  for await (const doc of cursor) {
+    res.status(200).send({ message: "Test number already exists" });
+    return;
+  }
+  const result = await coll.insertOne({
+    testnum: testnum,
+    questions: questions,
+    scheduled: scheduled,
+  });
+
+  // now i will add this test to all the students collection
+  for (let i = 0; i < allocatedStudents.length; i++) {
+    const studentname = allocatedStudents[i];
+    const coll = db.collection(`${studentname}`);
+    const result = await coll.insertOne({
+      testnum: testnum,
+      questions: questions,
+      started: false,
+      finished: false,
+      starttime: -1,
+      finishtime: -1,
+    });
+  }
+  res.status(200).send({ message: "Test added successfully" });
 });
 
 // Start the Express server
