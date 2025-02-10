@@ -406,6 +406,7 @@ app.post("/addtestadmin", async (req, res) => {
       finished: false,
       starttime: -1,
       finishtime: -1,
+      scheduled: scheduled,
     });
   }
   res.status(200).send({ message: "Test added successfully" });
